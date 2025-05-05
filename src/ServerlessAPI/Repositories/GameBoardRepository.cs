@@ -41,4 +41,28 @@ public class GameBoardRepository
             return null;
         }
     }
+
+    public async Task<bool> LogBoardEventAsync(string gameId, string userId, string item, bool marked, string? note = null)
+    {
+        try
+        {
+            var boardEvent = new BoardEvent
+            {
+                GameUserKey = $"{gameId}#{userId}",
+                Timestamp = DateTime.UtcNow.ToString("o"),
+                Item = item,
+                Marked = marked,
+                Note = note
+            };
+
+            await context.SaveAsync(boardEvent);
+            logger.LogInformation("Board event saved for {GameId}:{UserId} - {Item} marked: {Marked}", gameId, userId, item, marked);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to save BoardEvent");
+            return false;
+        }
+    }
 }
