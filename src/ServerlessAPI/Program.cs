@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging
         .ClearProviders()
         .AddJsonConsole();
- 
+
 // Add services to the container.
 builder.Services
         .AddControllers()
@@ -20,12 +20,24 @@ builder.Services
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         });
 
-string region = Environment.GetEnvironmentVariable("AWS_REGION") ?? RegionEndpoint.USEast2.SystemName;
+
+string? v = builder.Configuration["USE_DYNAMODB_LOCAL"];
+var useLocalDynamoDb = v == "true";
+Console.WriteLine($"env flag: {v}");
+
+var dynamoDbClient = useLocalDynamoDb
+    ? new AmazonDynamoDBClient(new Amazon.Runtime.BasicAWSCredentials("fake", "fake"), new AmazonDynamoDBConfig
+        {
+            ServiceURL = "http://host.docker.internal:8000",
+            UseHttp = true
+        })
+    : new AmazonDynamoDBClient();
+
 builder.Services
-        .AddSingleton<IAmazonDynamoDB>(new AmazonDynamoDBClient(RegionEndpoint.GetBySystemName(region)))
+        .AddSingleton<IAmazonDynamoDB>(dynamoDbClient)
         .AddScoped<IDynamoDBContext, DynamoDBContext>()
-        .AddScoped<IBookRepository, BookRepository>()
-        .AddScoped<GameBoardRepository>()
+        // .AddScoped<IBookRepository, BookRepository>()
+        // .AddScoped<GameBoardRepository>()
         .AddScoped<GameConfigRepository>();
 
 
@@ -40,6 +52,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/", () => "Welcome to running ASP.NET Core Minimal API on AWS Lambda");
+app.MapGet("/", () => "zz");
 
 app.Run();
