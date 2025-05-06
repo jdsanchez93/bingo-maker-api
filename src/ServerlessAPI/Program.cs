@@ -21,9 +21,7 @@ builder.Services
         });
 
 
-string? v = builder.Configuration["USE_DYNAMODB_LOCAL"];
-var useLocalDynamoDb = v == "true";
-Console.WriteLine($"env flag: {v}");
+var useLocalDynamoDb = builder.Configuration["USE_DYNAMODB_LOCAL"] == "true";
 
 var dynamoDbClient = useLocalDynamoDb
     ? new AmazonDynamoDBClient(new Amazon.Runtime.BasicAWSCredentials("fake", "fake"), new AmazonDynamoDBConfig
@@ -37,7 +35,7 @@ builder.Services
         .AddSingleton<IAmazonDynamoDB>(dynamoDbClient)
         .AddScoped<IDynamoDBContext, DynamoDBContext>()
         // .AddScoped<IBookRepository, BookRepository>()
-        // .AddScoped<GameBoardRepository>()
+        .AddScoped<GameBoardRepository>()
         .AddScoped<GameConfigRepository>();
 
 
