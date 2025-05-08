@@ -3,11 +3,11 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography, Paper } from '@mui/material';
 
 interface BingoItem {
-  id: string;
+  itemId: string;
   label: string;
 }
 
@@ -15,29 +15,23 @@ interface BoardCell extends BingoItem {
   marked: boolean;
 }
 
-const generateMockBoard = (): BoardCell[] => {
-  const labels = [
-    'Apple', 'Banana', 'Cat', 'Dog', 'Egg',
-    'Fish', 'Goat', 'Hat', 'Ice', 'Jam',
-    'Kite', 'Lion', 'Moon', 'Nest', 'Owl',
-    'Pig', 'Queen', 'Rat', 'Sun', 'Tree',
-    'Umbrella', 'Van', 'Whale', 'Xylophone', 'Yarn'
-  ];
-
-  return labels.map((label, index) => ({
-    id: `item-${index}`,
-    label,
-    marked: false
-  }));
-};
-
 export default function GamePage() {
-  const [boardItems, setBoardItems] = useState<BoardCell[]>(generateMockBoard());
+  const [boardItems, setBoardItems] = useState<BoardCell[]>([]);
+
+  useEffect(() => {
+    const fetchBoard = async () => {
+      const res = await fetch(`/api/GameBoard/costco/users/jd`);
+      const data = await res.json();
+      setBoardItems(data.boardItems); // assuming boardItems is an array of BoardCell
+    };
+  
+    fetchBoard();
+  }, []);
 
   const toggleMarked = (id: string) => {
     setBoardItems(prev =>
       prev.map(cell =>
-        cell.id === id ? { ...cell, marked: !cell.marked } : cell
+        cell.itemId === id ? { ...cell, marked: !cell.marked } : cell
       )
     );
   };
@@ -49,13 +43,13 @@ export default function GamePage() {
       </Typography>
       <Grid container spacing={2}>
         {boardItems.map((item, index) => (
-          <Grid size={{xs:2.4}} key={item.id}>
+          <Grid size={{xs:2.4}} key={item.itemId}>
             <Paper elevation={3} sx={{ p: 2, textAlign: 'center', bgcolor: item.marked ? 'lightgreen' : 'white' }}>
               <Typography variant="body1">{item.label}</Typography>
               <Button
                 variant="contained"
                 color={item.marked ? 'secondary' : 'primary'}
-                onClick={() => toggleMarked(item.id)}
+                onClick={() => toggleMarked(item.itemId)}
                 size="small"
                 sx={{ mt: 1 }}
               >
