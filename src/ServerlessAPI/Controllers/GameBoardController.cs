@@ -37,7 +37,7 @@ public class GameBoardController : ControllerBase
         return success ? Ok(newBoard) : BadRequest("Failed to save board.");
     }
 
-    private Dictionary<string, bool> GenerateRandomBoard(GameConfig gameConfig)
+    private List<BoardCell> GenerateRandomBoard(GameConfig gameConfig)
     {
         var random = new Random();
 
@@ -54,7 +54,12 @@ public class GameBoardController : ControllerBase
             .Take(25)
             .ToList();
 
-        return allItems.ToDictionary(item => item.Label, item => false);
+        return allItems.Select(item => new BoardCell
+        {
+            ItemId = item.Id,
+            Label = item.Label,
+            Marked = false
+        }).ToList();
     }
 
     [HttpGet("{gameId}/users/{userId}")]
@@ -73,12 +78,13 @@ public class GameBoardController : ControllerBase
             return NotFound("Game board not found.");
         }
 
-        if (!board.BoardItems.ContainsKey(request.Item))
+        var cell = board.BoardItems.FirstOrDefault(c => c.ItemId == request.ItemId);
+        if (cell == null)
         {
             return BadRequest("Item does not exist on the board.");
         }
 
-        board.BoardItems[request.Item] = request.IsMarked;
+        cell.Marked = request.IsMarked;
 
         var success = await boardRepo.SaveBoardAsync(board);
         return success ? Ok(board) : StatusCode(500, "Failed to update board.");
@@ -87,6 +93,6 @@ public class GameBoardController : ControllerBase
 
 public class UpdateBoardItemRequest
 {
-    public string Item { get; set; } = default!;
+    public string ItemId { get; set; } = default!;
     public bool IsMarked { get; set; }
 }

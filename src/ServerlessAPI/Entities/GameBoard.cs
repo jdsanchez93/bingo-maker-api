@@ -12,5 +12,12 @@ public class GameBoard
     public string UserId { get; set; } = null!;
 
     [DynamoDBProperty]
-    public Dictionary<string, bool> BoardItems { get; set; } = new();
+    public List<BoardCell> BoardItems { get; set; } = new();
+}
+
+public class BoardCell
+{
+    public string ItemId { get; set; } = default!;
+    public string Label { get; set; } = default!;
+    public bool Marked { get; set; }
 }
