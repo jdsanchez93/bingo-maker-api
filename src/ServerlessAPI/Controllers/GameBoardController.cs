@@ -39,12 +39,22 @@ public class GameBoardController : ControllerBase
 
     private Dictionary<string, bool> GenerateRandomBoard(GameConfig gameConfig)
     {
-
-        //shuffle and select 25 items from gameConfig.PossibleItems
-        var items = gameConfig.PossibleItems;
         var random = new Random();
-        var selectedItems = items.OrderBy(x => random.Next()).Take(25).ToList();
-        return selectedItems.ToDictionary(item => item, item => false);
+
+        var pickOneItems = gameConfig.Categories
+            .Where(c => c.Type == CategoryType.PickOne)
+            .Select(c => c.Items[random.Next(c.Items.Count)]);
+
+        var rankedItems = gameConfig.Categories
+            .Where(c => c.Type == CategoryType.RankedDifficulty)
+            .SelectMany(c => c.Items);
+
+        var allItems = pickOneItems.Concat(rankedItems)
+            .OrderBy(_ => random.Next())
+            .Take(25)
+            .ToList();
+
+        return allItems.ToDictionary(item => item.Label, item => false);
     }
 
     [HttpGet("{gameId}/users/{userId}")]
