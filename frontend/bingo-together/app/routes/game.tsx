@@ -29,10 +29,26 @@ export default function GamePage() {
     fetchBoard();
   }, []);
 
-  const toggleMarked = (id: string) => {
+  const toggleMarked = async (id: string) => {
+    const item = boardItems.find(cell => cell.itemId === id);
+    if (!item) return;
+  
+    const newMarked = !item.marked;
+  
+    await fetch(`/api/GameBoard/costco/users/jd/items`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        itemId: id,
+        isMarked: newMarked
+      }),
+    });
+  
     setBoardItems(prev =>
       prev.map(cell =>
-        cell.itemId === id ? { ...cell, marked: !cell.marked } : cell
+        cell.itemId === id ? { ...cell, marked: newMarked } : cell
       )
     );
   };
