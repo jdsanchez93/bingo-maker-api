@@ -41,25 +41,34 @@ public class GameBoardController : ControllerBase
     {
         var random = new Random();
 
-        var pickOneItems = gameConfig.Categories
+        var pickOneCells = gameConfig.Categories
             .Where(c => c.Type == CategoryType.PickOne)
-            .Select(c => c.Items[random.Next(c.Items.Count)]);
+            .Select(c =>
+            {
+                var item = c.Items[random.Next(c.Items.Count)];
+                return new BoardCell
+                {
+                    ItemId = item.Id,
+                    Label = item.Label,
+                    CategoryName = c.Name,
+                    Marked = false
+                };
+            });
 
-        var rankedItems = gameConfig.Categories
+        var rankedCells = gameConfig.Categories
             .Where(c => c.Type == CategoryType.RankedDifficulty)
-            .SelectMany(c => c.Items);
+            .SelectMany(c => c.Items.Select(item => new BoardCell
+            {
+                ItemId = item.Id,
+                Label = item.Label,
+                CategoryName = c.Name,
+                Marked = false
+            }));
 
-        var allItems = pickOneItems.Concat(rankedItems)
+        return pickOneCells.Concat(rankedCells)
             .OrderBy(_ => random.Next())
             .Take(25)
             .ToList();
-
-        return allItems.Select(item => new BoardCell
-        {
-            ItemId = item.Id,
-            Label = item.Label,
-            Marked = false
-        }).ToList();
     }
 
     [HttpGet("{gameId}/users/{userId}")]
