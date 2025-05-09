@@ -38,31 +38,35 @@ export default function GamePage() {
   };
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: 2, overflowX: 'auto' }}>
       <Typography variant="h4" gutterBottom>
         Bingo Together
       </Typography>
-      <Grid container columns={5} spacing={1}>
-        {boardItems.map((item, index) => (
-          <Grid size={{xs:1}} key={item.itemId} >
-            <Card sx={{
-              // width: '125px',
-              height: '125px',
-              bgcolor: item.marked ? 'lightgreen' : 'white',
-              }}>
-              <CardActionArea onClick={() => toggleMarked(item.itemId)}>
-                <CardHeader
-                  // title={item.categoryName}
-                  subheader={item.categoryName}
-                />
-                <CardContent>
-                  <Typography variant="body2">{item.label}</Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      <Box sx={{ minWidth: '960px' }}>
+        <Grid container spacing={2} wrap="wrap" columns={5}>
+          {boardItems.map((item, index) => (
+            <Grid size={{xs:1}} key={item.itemId}>
+              <Card
+                sx={{
+                  width: '185px',
+                  height: '125px',
+                  bgcolor: item.marked ? 'lightgreen' : 'white',
+                }}
+              >
+                <CardActionArea onClick={() => toggleMarked(item.itemId)} sx={{ height: '100%' }}>
+                  <CardHeader
+                    subheader={item.categoryName}
+                    sx={{ pt: 1, pb: 0 }}
+                  />
+                  <CardContent sx={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}>
+                    <Typography variant="body2">{item.label}</Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     </Box>
   );
 }
