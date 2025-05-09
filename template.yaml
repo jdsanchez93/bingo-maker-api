@@ -21,6 +21,8 @@ Resources:
         Variables:
           SAMPLE_TABLE: !Ref SampleTable
           USE_DYNAMODB_LOCAL: "false"
+          Auth0__Domain: https://auth0.jd-sanchez.com
+          Auth0__Audience: https://bingo-api.jd-sanchez.com
       Policies:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
