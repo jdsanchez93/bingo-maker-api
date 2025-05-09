@@ -4,11 +4,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Typography, Paper } from '@mui/material';
+import { Box, Button, Grid, Typography, Paper, Card, CardActionArea, CardContent, CardHeader } from '@mui/material';
 
 interface BingoItem {
   itemId: string;
   label: string;
+  categoryName: string;
 }
 
 interface BoardCell extends BingoItem {
@@ -41,21 +42,24 @@ export default function GamePage() {
       <Typography variant="h4" gutterBottom>
         Bingo Together
       </Typography>
-      <Grid container spacing={2}>
+      <Grid container columns={5} spacing={1}>
         {boardItems.map((item, index) => (
-          <Grid size={{xs:2.4}} key={item.itemId}>
-            <Paper elevation={3} sx={{ p: 2, textAlign: 'center', bgcolor: item.marked ? 'lightgreen' : 'white' }}>
-              <Typography variant="body1">{item.label}</Typography>
-              <Button
-                variant="contained"
-                color={item.marked ? 'secondary' : 'primary'}
-                onClick={() => toggleMarked(item.itemId)}
-                size="small"
-                sx={{ mt: 1 }}
-              >
-                {item.marked ? 'Unmark' : 'Mark'}
-              </Button>
-            </Paper>
+          <Grid size={{xs:1}} key={item.itemId} >
+            <Card sx={{
+              // width: '125px',
+              height: '125px',
+              bgcolor: item.marked ? 'lightgreen' : 'white',
+              }}>
+              <CardActionArea onClick={() => toggleMarked(item.itemId)}>
+                <CardHeader
+                  // title={item.categoryName}
+                  subheader={item.categoryName}
+                />
+                <CardContent>
+                  <Typography variant="body2">{item.label}</Typography>
+                </CardContent>
+              </CardActionArea>
+            </Card>
           </Grid>
         ))}
       </Grid>

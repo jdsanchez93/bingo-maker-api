@@ -19,5 +19,6 @@ public class BoardCell
 {
     public string ItemId { get; set; } = default!;
     public string Label { get; set; } = default!;
+    public string CategoryName { get; set; } = default!;
     public bool Marked { get; set; }
 }
