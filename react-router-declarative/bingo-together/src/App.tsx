@@ -3,6 +3,7 @@ import RequireAuth from './components/RequireAuth'
 import Home from './pages/Home'
 import Game from './pages/Game'
 import Dashboard from './pages/Dashboard'
+import GamePage from './pages/GamePage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           </RequireAuth>
         }
       />
+      <Route path="/gamePage" element={<GamePage />} />
       <Route
         path="/dashboard"
         element={<Dashboard />}
