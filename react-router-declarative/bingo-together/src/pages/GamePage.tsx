@@ -29,25 +29,40 @@ export default function GamePage() {
   const toggleMarked = async (id: string) => {
     const item = boardItems.find(cell => cell.itemId === id);
     if (!item) return;
-  
+
     const newMarked = !item.marked;
-  
-    await fetch(`/api/GameBoard/costco/users/jd/items`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        itemId: id,
-        isMarked: newMarked
-      }),
-    });
-  
+
+    // Optimistically update UI
     setBoardItems(prev =>
       prev.map(cell =>
         cell.itemId === id ? { ...cell, marked: newMarked } : cell
       )
     );
+
+    try {
+      const response = await fetch(`/api/GameBoard/costco/users/jd/items`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          itemId: id,
+          isMarked: newMarked
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("API error");
+      }
+    } catch (error) {
+      // Rollback the optimistic update
+      setBoardItems(prev =>
+        prev.map(cell =>
+          cell.itemId === id ? { ...cell, marked: !newMarked } : cell
+        )
+      );
+      console.error("Failed to update item:", error);
+    }
   };
 
   return (
