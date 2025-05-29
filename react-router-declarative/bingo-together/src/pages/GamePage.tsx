@@ -2,6 +2,7 @@
 
 import { Box, Grid, Typography, Card, CardActionArea, CardContent, CardHeader } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
 interface BingoItem {
   itemId: string;
@@ -14,12 +15,16 @@ interface BoardCell extends BingoItem {
 }
 
 export default function GamePage() {
-  const queryClient = useQueryClient();
+  const [gameBoard, setGameBoard] = useState<{ gameId: string; userId: string }>({
+    gameId: '',
+    userId: '',
+  });  const queryClient = useQueryClient();
 
   const { data: boardItems = [], isLoading } = useQuery({
     queryKey: ['board'], queryFn: async () => {
       const res = await fetch(`/api/GameBoard/costco/users/jd`);
       const data = await res.json();
+      setGameBoard(data);
       return data.boardItems as BoardCell[];
     }
   });
@@ -59,12 +64,15 @@ export default function GamePage() {
   return (
     <Box sx={{ p: 2, overflowX: 'auto' }}>
       <Typography variant="h4" gutterBottom>
-        name
+        {gameBoard.gameId}
+      </Typography>
+      <Typography variant="subtitle1" gutterBottom>
+        {gameBoard.userId}
       </Typography>
       <Box sx={{ minWidth: '960px' }}>
         {isLoading ? <Typography>Loading...</Typography> : (
           <Grid container spacing={2} wrap="wrap" columns={5}>
-            {boardItems.map((item, index) => (
+            {boardItems.map((item, _index) => (
               <Grid size={{ xs: 1 }} key={item.itemId}>
                 <Card
                   sx={{
