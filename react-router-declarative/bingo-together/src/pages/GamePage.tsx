@@ -51,12 +51,8 @@ export default function GamePage() {
       }
       window.alert("Failed to update item. Please try again.");
     },
-    onSuccess: (updatedBoardItems, variables) => {
-      queryClient.setQueryData<BoardCell[]>(['board'], old =>
-        old?.map(item =>
-          item.itemId === variables.id ? { ...item, marked: variables.newMarked } : item
-        )
-      );
+    onSettled: () => {
+      queryClient.invalidateQueries({queryKey: ['board']});
     }
   });
 
