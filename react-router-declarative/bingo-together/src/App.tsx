@@ -8,7 +8,8 @@ import GamePage from './pages/GamePage'
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<GamePage />} />
+      <Route path="/home" element={<Home />} />
       <Route
         path="/game"
         element={
@@ -17,7 +18,6 @@ export default function App() {
           </RequireAuth>
         }
       />
-      <Route path="/gamePage" element={<GamePage />} />
       <Route
         path="/dashboard"
         element={<Dashboard />}
