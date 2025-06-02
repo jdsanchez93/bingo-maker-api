@@ -28,3 +28,13 @@ warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
+
+[dev.deploy.parameters]
+stack_name = "bingo-together-dev"
+resolve_s3 = true
+s3_prefix = "bingo-together-dev"
+region = "us-east-1"
+profile = "stephane"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
