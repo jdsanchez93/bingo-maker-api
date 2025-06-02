@@ -37,12 +37,6 @@ Resources:
             PayloadFormatVersion: "2.0"
             Path: /{proxy+}
             Method: ANY
-        RootResource:
-          PayloadFormatVersion: "2.0"
-          Type: HttpApi
-          Properties:
-            Path: /
-            Method: ANY
 
   GameConfigsTable:
     Type: AWS::Serverless::SimpleTable
