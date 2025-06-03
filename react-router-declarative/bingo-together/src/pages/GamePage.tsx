@@ -3,6 +3,7 @@
 import { Box, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { useAuth0 } from "@auth0/auth0-react";
 
 interface BingoItem {
   itemId: string;
@@ -27,9 +28,17 @@ export default function GamePage() {
   });
   const queryClient = useQueryClient();
 
+  const { getAccessTokenSilently } = useAuth0();
+
   const { data: boardItems = [], isLoading } = useQuery({
-    queryKey: ['board'], queryFn: async () => {
-      const res = await fetch(`/api/GameBoard/costco/users/jd`);
+    queryKey: ['board'],
+    queryFn: async () => {
+      const token = await getAccessTokenSilently();
+      const res = await fetch(`/api/GameBoard/costco`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await res.json();
       setGameBoard(data);
       return data.boardItems as BoardCell[];
@@ -38,9 +47,10 @@ export default function GamePage() {
 
   const mutation = useMutation({
     mutationFn: async ({ id, newMarked }: { id: string; newMarked: boolean }) => {
-      const response = await fetch(`/api/GameBoard/costco/users/jd/items`, {
+      const token = await getAccessTokenSilently();
+      const response = await fetch(`/api/GameBoard/costco/items`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ itemId: id, isMarked: newMarked }),
       });
       if (!response.ok) throw new Error("API error");

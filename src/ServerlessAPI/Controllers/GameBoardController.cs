@@ -1,10 +1,14 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServerlessAPI.Entities;
 using ServerlessAPI.Repositories;
+using ServerlessAPI.Extensions;
 
 namespace ServerlessAPI.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class GameBoardController : ControllerBase
 {
@@ -17,9 +21,15 @@ public class GameBoardController : ControllerBase
         this.configRepo = configRepo;
     }
 
-    [HttpPost("{gameId}/users/{userId}")]
-    public async Task<IActionResult> CreateBoard(string gameId, string userId)
+    [HttpPost("{gameId}")]
+    public async Task<IActionResult> CreateBoard(string gameId)
     {
+        var userId = User.GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User ID not found in token.");
+        }
+
         var gameConfig = await configRepo.GetByIdAsync(gameId);
         if (gameConfig == null)
         {
@@ -30,7 +40,7 @@ public class GameBoardController : ControllerBase
         {
             GameId = gameId,
             UserId = userId,
-            BoardItems = GenerateRandomBoard(gameConfig) // Helper method
+            BoardItems = GenerateRandomBoard(gameConfig)
         };
 
         var success = await boardRepo.SaveBoardAsync(newBoard);
@@ -71,16 +81,27 @@ public class GameBoardController : ControllerBase
             .ToList();
     }
 
-    [HttpGet("{gameId}/users/{userId}")]
-    public async Task<IActionResult> GetBoard(string gameId, string userId)
+    [HttpGet("{gameId}")]
+    public async Task<IActionResult> GetBoard(string gameId)
     {
+        var userId = User.GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User ID not found in token.");
+        }
         var board = await boardRepo.GetBoardAsync(gameId, userId);
         return board == null ? NotFound() : Ok(board);
     }
 
-    [HttpPatch("{gameId}/users/{userId}/items")]
-    public async Task<IActionResult> UpdateBoardItem(string gameId, string userId, [FromBody] UpdateBoardItemRequest request)
+    [HttpPatch("{gameId}/items")]
+    public async Task<IActionResult> UpdateBoardItem(string gameId, [FromBody] UpdateBoardItemRequest request)
     {
+        var userId = User.GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User ID not found in token.");
+        }
+
         var board = await boardRepo.GetBoardAsync(gameId, userId);
         if (board == null)
         {
