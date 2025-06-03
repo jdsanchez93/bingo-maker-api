@@ -28,6 +28,7 @@ const CreateBoard: React.FC = () => {
       }
 
       const data = await res.json();
+      console.log("Board created:", data);
       setResponse("Board created successfully!");
     } catch (err: any) {
       setError(err.message || "Unknown error");
