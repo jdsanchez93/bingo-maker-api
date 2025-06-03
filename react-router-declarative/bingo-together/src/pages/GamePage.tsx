@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Grid, Typography, Card, CardActionArea, CardContent, CardHeader } from '@mui/material';
+import { Box, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -14,11 +14,18 @@ interface BoardCell extends BingoItem {
   marked: boolean;
 }
 
+const theme = createTheme({
+  typography: {
+    fontSize: 8
+  }
+})
+
 export default function GamePage() {
   const [gameBoard, setGameBoard] = useState<{ gameId: string; userId: string }>({
     gameId: '',
     userId: '',
-  });  const queryClient = useQueryClient();
+  });
+  const queryClient = useQueryClient();
 
   const { data: boardItems = [], isLoading } = useQuery({
     queryKey: ['board'], queryFn: async () => {
@@ -57,43 +64,85 @@ export default function GamePage() {
       window.alert("Failed to update item. Please try again.");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({queryKey: ['board']});
+      queryClient.invalidateQueries({ queryKey: ['board'] });
     }
   });
 
   return (
-    <Box sx={{ p: 2, overflowX: 'auto' }}>
+    <Box sx={{ p: 1, overflowX: 'auto' }}>
       <Typography variant="h4" gutterBottom>
         {gameBoard.gameId}
       </Typography>
       <Typography variant="subtitle1" gutterBottom>
         {gameBoard.userId}
       </Typography>
-      <Box sx={{ minWidth: '960px' }}>
+      <Box>
         {isLoading ? <Typography>Loading...</Typography> : (
-          <Grid container spacing={2} wrap="wrap" columns={5}>
-            {boardItems.map((item, _index) => (
-              <Grid size={{ xs: 1 }} key={item.itemId}>
-                <Card
+          <ThemeProvider theme={theme}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(5, 1fr)',
+                gap: '5px',
+                width: '100%',
+                maxWidth: 500,
+                margin: '0 auto',
+              }}
+            >
+              {boardItems.map((item) => (
+                <Box
+                  key={item.itemId}
                   sx={{
-                    width: '185px',
-                    height: '125px',
-                    bgcolor: item.marked ? 'lightgreen' : 'white',
+                    bgcolor: item.marked ? 'lightgreen' : 'lightgray',
+                    border: '1px solid #ccc',
+                    borderRadius: 1,
+                    aspectRatio: '1 / 1',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    p: 1,
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
                   }}
+                  onClick={() => mutation.mutate({ id: item.itemId, newMarked: !item.marked })}
                 >
-                  <CardActionArea onClick={() => mutation.mutate({ id: item.itemId, newMarked: !item.marked })} sx={{ height: '100%' }}>
-                    <CardHeader
-                      subheader={item.categoryName}
-                      sx={{ pt: 1, pb: 0 }}
-                    />
-                    <CardContent sx={{ height: 'calc(100% - 48px)', overflow: 'hidden' }}>
-                      <Typography variant="body2">{item.label}</Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
+                  <Box sx={{ flex: '0 0 auto' }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ color: 'text.secondary' }}
+                    >
+                      {item.categoryName}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      flex: '1 1 auto',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.primary',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        whiteSpace: 'normal',
+                        textAlign: 'center',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 4,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {item.label}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </ThemeProvider>
         )}
       </Box>
     </Box>
