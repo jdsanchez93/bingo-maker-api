@@ -22,7 +22,7 @@ Resources:
           GAME_CONFIG_TABLE: !Ref GameConfigsTable
           GAME_BOARD_TABLE: !Ref GameBoardsTable
           USE_DYNAMODB_LOCAL: "false"
-          Auth0__Domain: dev-rqtd0acytoaoqh1w.us.auth0.com
+          Auth0__Domain: auth0.jd-sanchez.com
           Auth0__Audience: https://bingo-api.jd-sanchez.com
       Policies:
         # Give Create/Read/Update/Delete Permissions to the Tables
