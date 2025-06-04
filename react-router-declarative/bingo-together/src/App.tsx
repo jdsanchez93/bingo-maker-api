@@ -1,7 +1,6 @@
 import { Route, Routes } from 'react-router'
 import RequireAuth from './components/RequireAuth'
 import Home from './pages/Home'
-import Dashboard from './pages/Dashboard'
 import GamePage from './pages/GamePage'
 import CreateBoard from './pages/CreateBoard'
 
@@ -16,10 +15,6 @@ export default function App() {
             <GamePage />
           </RequireAuth>
         }
-      />
-      <Route
-        path="/dashboard"
-        element={<Dashboard />}
       />
       <Route
         path="/create-board"
