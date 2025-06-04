@@ -31,4 +31,11 @@ public class GameConfigController : ControllerBase
         var config = await configRepo.GetByIdAsync(gameId);
         return config == null ? NotFound() : Ok(config);
     }
+
+    [HttpGet("latest")]
+    public async Task<IActionResult> GetLatest()
+    {
+        var configs = await configRepo.GetGameConfigsAsync();
+        return Ok(configs);
+    }
 }

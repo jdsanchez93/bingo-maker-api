@@ -4,6 +4,7 @@ import { Box, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
+import { useParams } from 'react-router';
 
 interface BingoItem {
   itemId: string;
@@ -22,6 +23,8 @@ const theme = createTheme({
 })
 
 export default function GamePage() {
+  const { gameId } = useParams<{ gameId: string }>();
+
   const [gameBoard, setGameBoard] = useState<{ gameId: string; userId: string }>({
     gameId: '',
     userId: '',
@@ -31,10 +34,11 @@ export default function GamePage() {
   const { getAccessTokenSilently } = useAuth0();
 
   const { data: boardItems = [], isLoading } = useQuery({
-    queryKey: ['board'],
+    queryKey: ['board', gameId],
+    enabled: !!gameId,
     queryFn: async () => {
       const token = await getAccessTokenSilently();
-      const res = await fetch(`/api/GameBoard/costco`, {
+      const res = await fetch(`/api/GameBoard/${gameId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -48,7 +52,7 @@ export default function GamePage() {
   const mutation = useMutation({
     mutationFn: async ({ id, newMarked }: { id: string; newMarked: boolean }) => {
       const token = await getAccessTokenSilently();
-      const response = await fetch(`/api/GameBoard/costco/items`, {
+      const response = await fetch(`/api/GameBoard/${gameId}/items`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ itemId: id, isMarked: newMarked }),
@@ -58,9 +62,9 @@ export default function GamePage() {
       return data.boardItems as BoardCell[]; // Assuming response has this
     },
     onMutate: async ({ id, newMarked }) => {
-      await queryClient.cancelQueries({ queryKey: ['board'] });
-      const previous = queryClient.getQueryData<BoardCell[]>(['board']);
-      queryClient.setQueryData<BoardCell[]>(['board'], old =>
+      await queryClient.cancelQueries({ queryKey: ['board', gameId] });
+      const previous = queryClient.getQueryData<BoardCell[]>(['board', gameId]);
+      queryClient.setQueryData<BoardCell[]>(['board', gameId], old =>
         old?.map(item =>
           item.itemId === id ? { ...item, marked: newMarked } : item
         )
@@ -69,12 +73,12 @@ export default function GamePage() {
     },
     onError: (_err, _variables, context) => {
       if (context?.previous) {
-        queryClient.setQueryData(['board'], context.previous);
+        queryClient.setQueryData(['board', gameId], context.previous);
       }
       window.alert("Failed to update item. Please try again.");
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['board'] });
+      queryClient.invalidateQueries({ queryKey: ['board', gameId] });
     }
   });
 
