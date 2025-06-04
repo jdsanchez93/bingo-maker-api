@@ -2,9 +2,9 @@
 
 import { Box, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
 interface BingoItem {
   itemId: string;
@@ -31,11 +31,14 @@ export default function GamePage() {
   });
   const queryClient = useQueryClient();
 
+  const navigate = useNavigate();
+
   const { getAccessTokenSilently } = useAuth0();
 
-  const { data: boardItems = [], isLoading } = useQuery({
+  const { data: boardItems = [], isLoading, error } = useQuery({
     queryKey: ['board', gameId],
     enabled: !!gameId,
+    retry: false,
     queryFn: async () => {
       const token = await getAccessTokenSilently();
       const res = await fetch(`/api/GameBoard/${gameId}`, {
@@ -43,11 +46,28 @@ export default function GamePage() {
           Authorization: `Bearer ${token}`,
         },
       });
+
+      if (res.status === 404) {
+        const err: any = new Error('Board not found');
+        err.code = 'BOARD_NOT_FOUND';
+        throw err;
+      }
+
+      if (!res.ok) {
+        throw new Error('Failed to load board');
+      }
+
       const data = await res.json();
       setGameBoard(data);
       return data.boardItems as BoardCell[];
     }
   });
+
+  useEffect(() => {
+  if ((error as any)?.code === 'BOARD_NOT_FOUND') {
+    navigate(`/create-board`);
+  }
+}, [error, navigate]);
 
   const mutation = useMutation({
     mutationFn: async ({ id, newMarked }: { id: string; newMarked: boolean }) => {
