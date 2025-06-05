@@ -65,7 +65,7 @@ export default function GamePage() {
 
   useEffect(() => {
   if ((error as any)?.code === 'BOARD_NOT_FOUND') {
-    navigate(`/create-board`);
+    navigate(`/create-board/${gameId}`);
   }
 }, [error, navigate]);
 
