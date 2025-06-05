@@ -119,10 +119,77 @@ public class GameBoardController : ControllerBase
         var success = await boardRepo.SaveBoardAsync(board);
         return success ? Ok(board) : StatusCode(500, "Failed to update board.");
     }
+
+    [HttpPost("{gameId}/custom")]
+    public async Task<IActionResult> CreateBoardWithSelections(string gameId, [FromBody] CreateBoardWithSelectionsRequest request)
+    {
+        var userId = User.GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User ID not found in token.");
+        }
+
+        var gameConfig = await configRepo.GetByIdAsync(gameId);
+        if (gameConfig == null)
+        {
+            return NotFound("Game config not found.");
+        }
+
+        var newBoard = new GameBoard
+        {
+            GameId = gameId,
+            UserId = userId,
+            BoardItems = GenerateBoardFromSelections(gameConfig, request.Selections)
+        };
+
+        var success = await boardRepo.SaveBoardAsync(newBoard);
+        return success ? Ok(newBoard) : BadRequest("Failed to save board.");
+    }
+
+    private List<BoardCell> GenerateBoardFromSelections(GameConfig config, Dictionary<string, string> selections)
+    {
+        var random = new Random();
+
+        var pickOneCells = config.Categories
+            .Where(c => c.Type == CategoryType.PickOne && selections.ContainsKey(c.Name))
+            .Select(c =>
+            {
+                var itemId = selections[c.Name];
+                var item = c.Items.First(i => i.Id == itemId);
+                return new BoardCell
+                {
+                    ItemId = item.Id,
+                    Label = item.Label,
+                    CategoryName = c.Name,
+                    Marked = false
+                };
+            });
+
+        var rankedCells = config.Categories
+            .Where(c => c.Type == CategoryType.RankedDifficulty)
+            .SelectMany(c => c.Items.Select(item => new BoardCell
+            {
+                ItemId = item.Id,
+                Label = item.Label,
+                CategoryName = c.Name,
+                Marked = false
+            }));
+
+        return pickOneCells.Concat(rankedCells)
+            .OrderBy(_ => random.Next())
+            .Take(25)
+            .ToList();
+    }
+
 }
 
 public class UpdateBoardItemRequest
 {
     public string ItemId { get; set; } = default!;
     public bool IsMarked { get; set; }
+}
+
+public class CreateBoardWithSelectionsRequest
+{
+    public Dictionary<string, string> Selections { get; set; } = new();
 }

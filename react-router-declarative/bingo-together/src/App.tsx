@@ -22,7 +22,7 @@ export default function App() {
         element={<Dashboard />}
       />
       <Route
-        path="/create-board"
+        path="/create-board/:gameId"
         element={
           <RequireAuth>
             <CreateBoard />
