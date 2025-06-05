@@ -175,10 +175,16 @@ public class GameBoardController : ControllerBase
                 Marked = false
             }));
 
-        return pickOneCells.Concat(rankedCells)
-            .OrderBy(_ => random.Next())
+        var pickOneCellsList = pickOneCells.ToList();
+        var rankedCellsList = rankedCells.OrderBy(_ => random.Next()).ToList();
+
+        var combined = pickOneCellsList
+            .Concat(rankedCellsList)
             .Take(25)
+            .OrderBy(_ => random.Next())
             .ToList();
+
+        return combined;
     }
 
     [HttpDelete("{gameId}")]
