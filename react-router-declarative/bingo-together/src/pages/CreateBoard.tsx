@@ -7,6 +7,7 @@ import {
   InputLabel,
   FormControl,
   Typography,
+  Grid,
 } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate, useParams } from "react-router";
@@ -86,6 +87,7 @@ export default function CreateBoard() {
       <Typography variant="subtitle1" gutterBottom>
         GameId: {gameConfig.gameId}
       </Typography>
+      <Box sx={{ mt: 2, mb: 2 }}>
         {pickOneCategories.map((cat) => (
           <FormControl key={cat.name} fullWidth sx={{ mb: 2, minWidth: 200 }}>
             <InputLabel>{cat.name}</InputLabel>
@@ -102,9 +104,25 @@ export default function CreateBoard() {
             </Select>
           </FormControl>
         ))}
+      </Box>
+      <Grid container spacing={2} >
+        <Button
+          variant="outlined"
+          onClick={() => {
+            const randomSelections: Record<string, string> = {};
+            pickOneCategories.forEach((cat) => {
+              const randomItem = cat.items[Math.floor(Math.random() * cat.items.length)];
+              randomSelections[cat.name] = randomItem.id;
+            });
+            setSelections(randomSelections);
+          }}
+        >
+          Randomize Selections
+        </Button>
         <Button variant="contained" onClick={handleSubmit} disabled={Object.keys(selections).length !== pickOneCategories.length}>
           Create Board
         </Button>
+      </Grid>
     </Box>
   );
 }
