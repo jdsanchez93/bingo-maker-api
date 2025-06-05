@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 interface BingoItem {
   id: string;
@@ -32,6 +32,7 @@ export default function CreateBoard() {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const { getAccessTokenSilently } = useAuth0();
   const { gameId } = useParams<{ gameId: string }>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -65,6 +66,7 @@ export default function CreateBoard() {
     if (res.ok) {
       const board = await res.json();
       console.log("Board created", board);
+      navigate(`/game/${gameId}`);
     } else {
       console.error("Failed to create board");
     }
@@ -81,25 +83,25 @@ export default function CreateBoard() {
       <Typography variant="h5" gutterBottom>
         Customize Your Board
       </Typography>
-      {pickOneCategories.map((cat) => (
-        <FormControl key={cat.name} fullWidth sx={{ mb: 2 }}>
-          <InputLabel>{cat.name}</InputLabel>
-          <Select
-            value={selections[cat.name] || ""}
-            label={cat.name}
-            onChange={(e) => handleChange(cat.name, e.target.value)}
-          >
-            {cat.items.map((item) => (
-              <MenuItem key={item.id} value={item.id}>
-                {item.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      ))}
-      <Button variant="contained" onClick={handleSubmit} disabled={Object.keys(selections).length !== pickOneCategories.length}>
-        Create Board
-      </Button>
+        {pickOneCategories.map((cat) => (
+          <FormControl key={cat.name} fullWidth sx={{ mb: 2, minWidth: 200 }}>
+            <InputLabel>{cat.name}</InputLabel>
+            <Select
+              value={selections[cat.name] || ""}
+              label={cat.name}
+              onChange={(e) => handleChange(cat.name, e.target.value)}
+            >
+              {cat.items.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        ))}
+        <Button variant="contained" onClick={handleSubmit} disabled={Object.keys(selections).length !== pickOneCategories.length}>
+          Create Board
+        </Button>
     </Box>
   );
 }
