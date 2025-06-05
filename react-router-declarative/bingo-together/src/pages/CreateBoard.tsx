@@ -80,8 +80,11 @@ export default function CreateBoard() {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        Customize Your Board
+      <Typography variant="h4" gutterBottom>
+        Create Your Bingo Board
+      </Typography>
+      <Typography variant="subtitle1" gutterBottom>
+        GameId: {gameConfig.gameId}
       </Typography>
         {pickOneCategories.map((cat) => (
           <FormControl key={cat.name} fullWidth sx={{ mb: 2, minWidth: 200 }}>
