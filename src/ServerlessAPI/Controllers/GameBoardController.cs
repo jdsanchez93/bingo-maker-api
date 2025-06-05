@@ -181,6 +181,25 @@ public class GameBoardController : ControllerBase
             .ToList();
     }
 
+    [HttpDelete("{gameId}")]
+    public async Task<IActionResult> DeleteBoard(string gameId)
+    {
+        var userId = User.GetUserId();
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User ID not found in token.");
+        }
+        
+        var board = await boardRepo.GetBoardAsync(gameId, userId);
+        if (board == null)
+        {
+            return NotFound("Game board not found.");
+        }
+
+        var success = await boardRepo.DeleteBoardAsync(board);
+        return success ? NoContent() : StatusCode(500, "Failed to delete board.");
+    }
+
 }
 
 public class UpdateBoardItemRequest

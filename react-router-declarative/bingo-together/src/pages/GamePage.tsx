@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, createTheme, ThemeProvider, Typography } from '@mui/material';
+import { Box, Button, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useAuth0 } from "@auth0/auth0-react";
@@ -33,7 +33,7 @@ export default function GamePage() {
 
   const navigate = useNavigate();
 
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, user } = useAuth0();
 
   const { data: boardItems = [], isLoading, error } = useQuery({
     queryKey: ['board', gameId],
@@ -64,10 +64,10 @@ export default function GamePage() {
   });
 
   useEffect(() => {
-  if ((error as any)?.code === 'BOARD_NOT_FOUND') {
-    navigate(`/create-board/${gameId}`);
-  }
-}, [error, navigate]);
+    if ((error as any)?.code === 'BOARD_NOT_FOUND') {
+      navigate(`/create-board/${gameId}`);
+    }
+  }, [error, navigate]);
 
   const mutation = useMutation({
     mutationFn: async ({ id, newMarked }: { id: string; newMarked: boolean }) => {
@@ -108,8 +108,30 @@ export default function GamePage() {
         {gameBoard.gameId}
       </Typography>
       <Typography variant="subtitle1" gutterBottom>
-        {gameBoard.userId}
+        {user?.given_name || user?.name}
       </Typography>
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={async () => {
+          const token = await getAccessTokenSilently();
+          const res = await fetch(`/api/GameBoard/${gameId}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+
+          if (res.ok) {
+            navigate(`/create-board/${gameId}`);
+          } else {
+            alert('Failed to delete board');
+          }
+        }}
+        sx={{ mb: 2 }}
+      >
+        Delete Board
+      </Button>
       <Box>
         {isLoading ? <Typography>Loading...</Typography> : (
           <ThemeProvider theme={theme}>
