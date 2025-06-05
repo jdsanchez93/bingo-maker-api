@@ -21,7 +21,7 @@ export default function Home() {
     <div>
       <h1>Welcome back!</h1>
       <LatestBoards />
-      {/* <LogoutButton /> */}
+      <LogoutButton />
     </div>
   );
 }
