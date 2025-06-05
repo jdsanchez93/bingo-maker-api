@@ -5,6 +5,9 @@ import App from './App.tsx'
 import { BrowserRouter } from 'react-router'
 import { Auth0Provider } from '@auth0/auth0-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import darkTheme from './theme'; // or wherever you save it
 
 const queryClient = new QueryClient();
 
@@ -23,9 +26,12 @@ createRoot(document.getElementById('root')!).render(
             redirect_uri: window.location.origin,
             audience: audience,
           }}>
-          <App />
+          <ThemeProvider theme={darkTheme}>
+            <CssBaseline />
+            <App />
+          </ThemeProvider>
         </Auth0Provider>
       </BrowserRouter>
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 )
