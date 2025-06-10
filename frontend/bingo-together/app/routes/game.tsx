@@ -1,10 +1,8 @@
-
-
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Grid, Typography, Paper, Card, CardActionArea, CardContent, CardHeader } from '@mui/material';
+import RequireAuth from '~/auth/RequireAuth';
 
 interface BingoItem {
   itemId: string;
@@ -54,6 +52,7 @@ export default function GamePage() {
   };
 
   return (
+    <RequireAuth>
     <Box sx={{ p: 2, overflowX: 'auto' }}>
       <Typography variant="h4" gutterBottom>
         Bingo Together
@@ -84,5 +83,6 @@ export default function GamePage() {
         </Grid>
       </Box>
     </Box>
+    </RequireAuth>
   );
 }

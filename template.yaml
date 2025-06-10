@@ -19,12 +19,17 @@ Resources:
       MemorySize: 1024
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
         Variables:
-          SAMPLE_TABLE: !Ref SampleTable
+          GAME_CONFIG_TABLE: !Ref GameConfigsTable
+          GAME_BOARD_TABLE: !Ref GameBoardsTable
           USE_DYNAMODB_LOCAL: "false"
+          Auth0__Domain: auth0.jd-sanchez.com
+          Auth0__Audience: https://bingo-api.jd-sanchez.com
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the Tables
         - DynamoDBCrudPolicy:
-            TableName: !Ref SampleTable
+            TableName: !Ref GameConfigsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref GameBoardsTable
       Events:
         ProxyResource:
           Type: HttpApi
@@ -32,24 +37,35 @@ Resources:
             PayloadFormatVersion: "2.0"
             Path: /{proxy+}
             Method: ANY
-        RootResource:
-          PayloadFormatVersion: "2.0"
-          Type: HttpApi
-          Properties:
-            Path: /
-            Method: ANY
 
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
-  SampleTable:
+  GameConfigsTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      TableName: bingo-maker-apiBookCatalog
+      TableName: GameConfigs
       PrimaryKey:
-        Name: Id
+        Name: GameId
         Type: String
       ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  GameBoardsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: GameBoards
+      AttributeDefinitions:
+        - AttributeName: GameId
+          AttributeType: S
+        - AttributeName: UserId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: GameId
+          KeyType: HASH
+        - AttributeName: UserId
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
 
 Outputs:
   WebEndpoint:

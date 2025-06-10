@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ServerlessAPI.Entities;
 using ServerlessAPI.Repositories;
@@ -6,6 +7,7 @@ using ServerlessAPI.Repositories;
 namespace ServerlessAPI.Controllers;
 
 [Route("api/[controller]")]
+[Authorize]
 [ApiController]
 public class GameConfigController : ControllerBase
 {
@@ -28,5 +30,12 @@ public class GameConfigController : ControllerBase
     {
         var config = await configRepo.GetByIdAsync(gameId);
         return config == null ? NotFound() : Ok(config);
+    }
+
+    [HttpGet("latest")]
+    public async Task<IActionResult> GetLatest()
+    {
+        var configs = await configRepo.GetGameConfigsAsync();
+        return Ok(configs);
     }
 }

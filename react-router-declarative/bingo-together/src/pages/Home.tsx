@@ -1,15 +1,7 @@
-import LogoutButton from "~/auth/logout-button";
-import type { Route } from "./+types/home";
 import { useAuth0 } from "@auth0/auth0-react";
-import LoginButton from "~/auth/login-button";
-import Profile from "~/auth/profile";
-
-export function meta({ }: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
-}
+import LoginButton from "../auth/login-button";
+import LogoutButton from "../auth/logout-button";
+import LatestBoards from "./LatestBoards";
 
 export default function Home() {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -28,7 +20,7 @@ export default function Home() {
   return (
     <div>
       <h1>Welcome back!</h1>
-      <Profile />
+      <LatestBoards />
       <LogoutButton />
     </div>
   );

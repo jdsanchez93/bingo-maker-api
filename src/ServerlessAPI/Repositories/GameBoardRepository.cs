@@ -42,6 +42,30 @@ public class GameBoardRepository
         }
     }
 
+    public async Task<bool> DeleteBoardAsync(GameBoard board)
+    {
+        bool result;
+        try
+        {
+            // Delete the board.
+            await context.DeleteAsync<GameBoard>(board.GameId, board.UserId);
+            // Try to retrieve deleted board. It should return null.
+
+            GameBoard deletedBoard = await context.LoadAsync<GameBoard>(board.GameId, board.UserId, new DynamoDBOperationConfig { ConsistentRead = true });
+
+            result = deletedBoard == null;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "fail to delete board from DynamoDb Table");
+            result = false;
+        }
+
+        if (result) logger.LogInformation("Board {gameId} {userId} is deleted", board.GameId, board.UserId);
+
+        return result;
+    }
+
     public async Task<bool> LogBoardEventAsync(string gameId, string userId, string item, bool marked, string? note = null)
     {
         try

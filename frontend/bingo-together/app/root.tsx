@@ -9,6 +9,8 @@ import {
 
 import type { Route } from "./+types/root";
 import "./app.css";
+import { Auth0Provider } from "@auth0/auth0-react";
+import { useState, useEffect } from "react";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -41,8 +43,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AuthWrapper({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const domain = import.meta.env.VITE_AUTH0_DOMAIN;
+  const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCE;
+
+  if (!mounted) return null;
+
+  return (
+    <Auth0Provider
+      domain={domain}
+      clientId={clientId}
+      authorizationParams={{
+        redirect_uri: window.location.origin,
+        audience,
+      }}
+    >
+      {children}
+    </Auth0Provider>
+  );
+}
+
 export default function App() {
-  return <Outlet />;
+  return (
+    <AuthWrapper>
+      <Outlet />
+    </AuthWrapper>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
