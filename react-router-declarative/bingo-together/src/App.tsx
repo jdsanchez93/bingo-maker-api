@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import GamePage from './pages/GamePage'
 import CreateBoard from './pages/CreateBoard'
+import ChatComponent from './pages/ChatComponent'
 
 export default function App() {
   return (
@@ -28,7 +29,11 @@ export default function App() {
             <CreateBoard />
           </RequireAuth>
         }
-        />            
+      />
+      <Route
+        path="/message"
+        element={<ChatComponent />}
+      />
     </Routes>
   )
 }

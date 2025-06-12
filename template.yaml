@@ -67,7 +67,53 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
+  # WebSocket API resources
+  GameWebSocketApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: GameWebSocketApi
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+
+  WebSocketHandlerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      CodeUri: ./src/GameWebSocketApi/
+      Handler: GameWebSocketApi::Function::Handler
+      Runtime: dotnet8
+      MemorySize: 512
+      Policies:
+        - Statement:
+            Effect: Allow
+            Action:
+              - execute-api:ManageConnections
+            Resource: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${GameWebSocketApi}/*"
+      Events:
+        ConnectRoute:
+          Type: Api
+          Properties:
+            ApiId: !Ref GameWebSocketApi
+            RouteKey: $connect
+        DisconnectRoute:
+          Type: ApiV2
+          Properties:
+            ApiId: !Ref GameWebSocketApi
+            RouteKey: $disconnect
+        MarkItemRoute:
+          Type: ApiV2
+          Properties:
+            ApiId: !Ref GameWebSocketApi
+            RouteKey: markItem
+        DefaultRoute:
+          Type: ApiV2
+          Properties:
+            ApiId: !Ref GameWebSocketApi
+            RouteKey: $default
+
 Outputs:
   WebEndpoint:
     Description: "API Gateway endpoint URL"
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
+  WebSocketApiUrl:
+    Description: "WebSocket API endpoint"
+    Value: !Sub "wss://${GameWebSocketApi}.execute-api.${AWS::Region}.amazonaws.com/"

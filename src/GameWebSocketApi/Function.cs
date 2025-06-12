@@ -1,3 +1,4 @@
+using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -7,15 +8,46 @@ namespace GameWebSocketApi;
 
 public class Function
 {
-    
-    /// <summary>
-    /// A simple function that takes a string and does a ToUpper
-    /// </summary>
-    /// <param name="input">The event for the Lambda function handler to process.</param>
-    /// <param name="context">The ILambdaContext that provides methods for logging and describing the Lambda environment.</param>
-    /// <returns></returns>
-    public string FunctionHandler(string input, ILambdaContext context)
+    public async Task<APIGatewayProxyResponse> Handler(APIGatewayProxyRequest request, ILambdaContext context)
     {
-        return input.ToUpper();
+        var routeKey = request.RequestContext.RouteKey;
+
+        switch (routeKey)
+        {
+            case "$connect": return await OnConnect(request, context);
+            case "$disconnect": return await OnDisconnect(request, context);
+            case "markItem": return await OnMarkItem(request, context);
+            default: return new APIGatewayProxyResponse { StatusCode = 200, Body = "Default route hit." };
+        }
+    }
+
+    private Task<APIGatewayProxyResponse> OnConnect(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        context.Logger.LogInformation($"Connected: {request.RequestContext.ConnectionId}");
+        return Task.FromResult(new APIGatewayProxyResponse
+        {
+            StatusCode = 200,
+            Body = "Connected."
+        });
+    }
+
+    private Task<APIGatewayProxyResponse> OnDisconnect(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        context.Logger.LogInformation($"Disconnected: {request.RequestContext.ConnectionId}");
+        return Task.FromResult(new APIGatewayProxyResponse
+        {
+            StatusCode = 200,
+            Body = "Disconnected."
+        });
+    }
+
+    private Task<APIGatewayProxyResponse> OnMarkItem(APIGatewayProxyRequest request, ILambdaContext context)
+    {
+        context.Logger.LogInformation($"markItem received: {request.Body}");
+        return Task.FromResult(new APIGatewayProxyResponse
+        {
+            StatusCode = 200,
+            Body = "Item marked (stub)."
+        });
     }
 }
